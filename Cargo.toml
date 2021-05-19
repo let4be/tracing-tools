@@ -1,0 +1,16 @@
+[package]
+name = "tracing-tools"
+version = "0.1.0"
+authors = ["Sergey F. <let4be@gmail.com>"]
+edition = "2018"
+description = "Quick and simple band aid for instrumenting async code with tracing"
+readme = "README.md"
+license = "MIT"
+repository = "https://github.com/let4be/tracing-tools"
+keywords = ["tokio", "tracing", "async", "rust"]
+
+[dependencies]
+tracing = "~0.1.25"
+tracing-futures = "~0.2.5"
+futures-lite = "~1.11.3"
+anyhow = "~1.0.40"
