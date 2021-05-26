@@ -94,13 +94,13 @@ macro_rules! function {
 
 #[macro_export]
 macro_rules! span {
-    ($lvl:expr, $($tts:tt)*) => {
-        tracing::span!($lvl, "task", name = $crate::clean_fn($crate::function!()).as_str(), $($tts)*);
+    ($($tts:tt)*) => {
+        tracing::span!(tracing::Level::ERROR, "task", name = $crate::clean_fn($crate::function!()).as_str(), $($tts)*);
     };
-    ($lvl:expr) => {
-        tracing::span!($lvl, "task", name = $crate::clean_fn($crate::function!()).as_str());
+    ($name:expr) => {
+        tracing::span!(tracing::Level::ERROR, "task", name = $name);
     };
-    ($lvl:expr, $name:expr) => {
-        tracing::span!($lvl, "task", name = $name);
+    () => {
+        tracing::span!(tracing::Level::ERROR, "task", name = $crate::clean_fn($crate::function!()).as_str());
     };
 }
