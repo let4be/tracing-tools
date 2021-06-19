@@ -6,59 +6,6 @@ use tracing_futures::Instrument;
 
 type Result<T> = anyhow::Result<T>;
 pub type TaskFut<'a, T=()> = Pin<Box<dyn Future<Output=Result<T>> + Send + 'a>>;
-pub type TaskFn<'a, T=()> = Box<dyn FnOnce() -> Result<T> + Send + 'a>;
-
-pub struct SyncTracingTask<'a, R=()> {
-    span: Span,
-    call: TaskFn<'a, R>,
-    is_long_lived: bool
-}
-
-impl<'a, R: Send + Sync> SyncTracingTask<'a, R> {
-    pub fn new<T: FnOnce() -> Result<R> + Send + 'a>(span: Span, call: T) -> Self {
-        Self {
-            span,
-            call: Box::new(call),
-            is_long_lived: true
-        }
-    }
-
-    pub fn new_short_lived<T: FnOnce() -> Result<R> + Send + 'a>(span: Span, call: T) -> Self {
-        Self {
-            span,
-            call: Box::new(call),
-            is_long_lived: false
-        }
-    }
-}
-
-impl<'a, R: Send + Sync + 'a> SyncTracingTask<'a, R> {
-    pub fn instrument(self) -> TaskFn<'a, R> {
-        let span = self.span;
-        let call = self.call;
-        let is_long_lived = self.is_long_lived;
-
-        let wrap = move || {
-            let _span_guard = span.entered();
-
-            if is_long_lived {
-                info!("Starting...");
-            }
-            let t = Instant::now();
-
-            let r = call();
-            if r.is_err() {
-                let err = r.err().unwrap();
-                error!(error = ?err, elapsed = ?t.elapsed(), "Finished with");
-                return Err(err);
-            }
-            info!(elapsed = ?t.elapsed(), "Finished [OK]...");
-            Ok(r.unwrap())
-        };
-
-        Box::new(wrap)
-    }
-}
 
 pub struct TracingTask<'a, R=()> {
     span: Span,
