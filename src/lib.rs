@@ -5,12 +5,12 @@ use tracing::{info, error, span::{Span}};
 use tracing_futures::Instrument;
 
 type Result<T> = anyhow::Result<T>;
-pub type PinnedFut<'a, T=()> = Pin<Box<dyn Future<Output=Result<T>> + Send + 'a>>;
-pub type Fn<'a, T=()> = Box<dyn FnOnce() -> Result<T> + Send + 'a>;
+pub type TaskFut<'a, T=()> = Pin<Box<dyn Future<Output=Result<T>> + Send + 'a>>;
+pub type TaskFn<'a, T=()> = Box<dyn FnOnce() -> Result<T> + Send + 'a>;
 
 pub struct SyncTracingTask<'a, R=()> {
     span: Span,
-    call: Fn<'a, R>,
+    call: TaskFn<'a, R>,
     is_long_lived: bool
 }
 
@@ -33,7 +33,7 @@ impl<'a, R: Send + Sync> SyncTracingTask<'a, R> {
 }
 
 impl<'a, R: Send + Sync + 'a> SyncTracingTask<'a, R> {
-    pub fn instrument(self) -> Fn<'a, R> {
+    pub fn instrument(self) -> TaskFn<'a, R> {
         let span = self.span;
         let call = self.call;
         let is_long_lived = self.is_long_lived;
@@ -62,7 +62,7 @@ impl<'a, R: Send + Sync + 'a> SyncTracingTask<'a, R> {
 
 pub struct TracingTask<'a, R=()> {
     span: Span,
-    future: PinnedFut<'a, R>,
+    future: TaskFut<'a, R>,
     is_long_lived: bool
 }
 
@@ -85,7 +85,7 @@ impl<'a, R: Send + Sync> TracingTask<'a, R> {
 }
 
 impl<'a, R: Send + Sync + 'a> TracingTask<'a, R> {
-    pub fn instrument(self) -> PinnedFut<'a, R> {
+    pub fn instrument(self) -> TaskFut<'a, R> {
         let span = self.span;
         let future = self.future;
         let is_long_lived = self.is_long_lived;
