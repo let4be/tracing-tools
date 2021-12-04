@@ -1,6 +1,6 @@
 [package]
 name = "tracing-tools"
-version = "0.5.0"
+version = "0.6.0"
 authors = ["Sergey F. <let4be@gmail.com>"]
 edition = "2018"
 description = "Quick and simple band aid for instrumenting async code with tracing"
