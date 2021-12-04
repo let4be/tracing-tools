@@ -12,5 +12,4 @@ keywords = ["tokio", "tracing", "async", "rust"]
 [dependencies]
 tracing = "^0.1.25"
 tracing-futures = "^0.2.5"
-futures-lite = "^1.11.3"
 anyhow = "^1.0.40"

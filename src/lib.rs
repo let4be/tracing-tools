@@ -1,11 +1,11 @@
 use std::{pin::Pin, time::Instant};
-use futures_lite::Future;
+use std::future::Future;
 
 use tracing::{info, error, span::{Span}};
 use tracing_futures::Instrument;
 
 type Result<T> = anyhow::Result<T>;
-pub type TaskFut<'a, T=()> = Pin<Box<dyn Future<Output=Result<T>> + Send + 'a>>;
+pub type TaskFut<'a, T=()> = Pin<Box<dyn Future<Output=Result<T>> + 'a>>;
 
 pub struct TracingTask<'a, R=()> {
     span: Span,
@@ -13,8 +13,8 @@ pub struct TracingTask<'a, R=()> {
     is_long_lived: bool
 }
 
-impl<'a, R: Send + Sync> TracingTask<'a, R> {
-    pub fn new<T: Future<Output=Result<R>> + Send + 'a>(span: Span, fut: T) -> TracingTask<'a, R> {
+impl<'a, R> TracingTask<'a, R> {
+    pub fn new<T: Future<Output=Result<R>> + 'a>(span: Span, fut: T) -> TracingTask<'a, R> {
         TracingTask {
             span,
             future: Box::pin(fut),
@@ -22,7 +22,7 @@ impl<'a, R: Send + Sync> TracingTask<'a, R> {
         }
     }
 
-    pub fn new_short_lived<T: Future<Output=Result<R>> + Send + 'a>(span: Span, fut: T) -> TracingTask<'a, R> {
+    pub fn new_short_lived<T: Future<Output=Result<R>> + 'a>(span: Span, fut: T) -> TracingTask<'a, R> {
         TracingTask {
             span,
             future: Box::pin(fut),
@@ -31,7 +31,7 @@ impl<'a, R: Send + Sync> TracingTask<'a, R> {
     }
 }
 
-impl<'a, R: Send + Sync + 'a> TracingTask<'a, R> {
+impl<'a, R: 'a> TracingTask<'a, R> {
     pub fn instrument(self) -> TaskFut<'a, R> {
         let span = self.span;
         let future = self.future;
